@@ -90,7 +90,7 @@ describe('Knots', function() {
 
     knots.run(['global', 'template:about', 'component:hovercard']);
     global.window.onload.call();
-    expect(called).to.be.true();
+    expect(called).to.equal(true);
   });
 
 });
