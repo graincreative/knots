@@ -1,7 +1,4 @@
-# Knots
-
-![Tests Status](https://codeship.com/projects/5011f040-8a31-0132-96df-7acbd47feca1/status?branch=master)
-
+# Knots [![Build Status](https://travis-ci.org/graincreative/knots.svg?branch=master)](https://travis-ci.org/graincreative/knots)
 
 ### Example
 
