@@ -1,75 +1,70 @@
-var Tie = require('./tie'),
-    _ = {
-        uniq: require('lodash/array/uniq'),
-        map: require('lodash/collection/map'),
-    };
+var _ = {
+  uniq: require('lodash/array/uniq'),
+  map: require('lodash/collection/map'),
+  flatten: require('lodash/array/flatten')
+};
 
 module.exports = Knots;
 
 function Knots() {
 
-    var knots = this;
+  var _this = this;
 
-    knots.keys = {};
+  this.ties = {};
 
-    knots.tie = function (key) {
+  this.tie = function(key, moduleContainer) {
+    var tie;
 
-        if (knots.keys.hasOwnProperty(key)) {
-            return knots.keys[key];
-        }
+    if (_this.ties.hasOwnProperty(key)) {
+      _this.ties[key].push(moduleContainer);
+      return _this;
+    }
 
-        var tie = new Tie();
-        knots.keys[key] = tie;
-        return tie;
+    _this.ties[key] = [moduleContainer];
+    return _this;
+  };
+
+  var domReady = function(load) {
+    window.onload = function() {
+      load();
     };
+  };
 
-    var domReady = function (load) {
-        window.onload = function () {
-            load();
-        };
-    };
+  this.domReady = function(af) {
+    domReady = af;
+  };
 
-    knots.domReady = function (af) {
-        domReady = af;
-    };
+  this.run = function(keys, options) {
 
-    knots.run = function (keys, options) {
+    var selectedModules = [];
+    var domReadyModules = [];
 
-        var selectedModules = [];
-        var domReadyModules = [];
+    options = (options === undefined) ? {} : options;
+    keys = _.uniq(keys);
 
-        options = (options === undefined) ? {} : options;
-        keys = _.uniq(keys);
+    for (var r = 0; r < keys.length; r++) {
+      if (_this.ties.hasOwnProperty(keys[r])) {
+        selectedModules = selectedModules.concat(_.flatten(_.map(_this.ties[keys[r]], function(e) {return e.call();})));
+      }
+    }
 
+    console.log('Knots: of', keys, ' Using: ', selectedModules);
+    for (var s = 0; s < selectedModules.length; s++) {
+      var moduleOutput = selectedModules[s].call({}, _this.events);
+      if (moduleOutput && moduleOutput.call && moduleOutput.apply) {
+        domReadyModules.push(moduleOutput);
+      }
+    }
 
-        for (var r = 0; r < keys.length; r++) {
+    domReady(function() {
+      for (var s = 0; s < domReadyModules.length; s++) {
+        domReadyModules[s].call({});
+      }
+      if (options.hasOwnProperty('callback')) {
+        options.callback();
+      }
+    });
+  };
 
-            if (knots.keys.hasOwnProperty(keys[r])) {
-                selectedModules = selectedModules.concat(knots.keys[keys[r]].modules);
-            }
-        }
-
-
-        console.log('Knots: of', keys,  ' Using: ', selectedModules);
-        for (var s = 0; s < selectedModules.length; s++) {
-            var moduleOutput = selectedModules[s].call({}, knots.events);
-            if (moduleOutput && moduleOutput.call && moduleOutput.apply) {
-                domReadyModules.push(moduleOutput);
-            }
-        }
-
-        domReady(function () {
-            for (var s = 0; s < domReadyModules.length; s++) {
-                domReadyModules[s].call({});
-            }
-            if (options.hasOwnProperty('callback')) {
-                options.callback();
-            }
-
-        });
-
-    };
-
-    return knots;
+  return this;
 }
-
