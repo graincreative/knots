@@ -1,7 +1,7 @@
 {
   "name": "knots",
   "version": "0.1.0",
-  "description": "Tie CommonJS modules to certain pages and templates",
+  "description": "Tie CommonJS modules to certain pages and components",
   "main": "index.js",
   "scripts": {
     "test": "mocha test",
